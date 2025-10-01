@@ -1,0 +1,6 @@
+include: package:lints/recommended.yaml
+
+linter:
+  rules:
+    # Adicione regras específicas se desejar
+    - avoid_print
