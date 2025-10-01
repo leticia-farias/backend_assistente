@@ -93,12 +93,8 @@ void initializeGemini() {
 // ---------------- FUNÇÃO AUXILIAR ----------------
 String sanitizeJson(String raw) {
   var sanitized = raw.trim();
-  if (sanitized.startsWith('```json')) {
-    sanitized = sanitized.substring(7).trim();
-  }
-  if (sanitized.endsWith('```')) {
-    sanitized = sanitized.substring(0, sanitized.length - 3).trim();
-  }
+  if (sanitized.startsWith('```json')) sanitized = sanitized.substring(7).trim();
+  if (sanitized.endsWith('```')) sanitized = sanitized.substring(0, sanitized.length - 3).trim();
   return sanitized;
 }
 
@@ -106,8 +102,7 @@ String sanitizeJson(String raw) {
 Future<List<Package>> suggestPackages(String userQuery) async {
   if (geminiModel == null) return [];
 
-  final availablePackagesJson =
-      jsonEncode(availablePackages.map((p) => p.toJson()).toList());
+  final availablePackagesJson = jsonEncode(availablePackages.map((p) => p.toJson()).toList());
 
   final systemInstruction = '''
 Você é um assistente de operadora.
@@ -142,9 +137,7 @@ Pacotes Disponíveis: $availablePackagesJson
     final jsonText = sanitizeJson(rawText);
     final List<dynamic> jsonList = jsonDecode(jsonText);
 
-    return jsonList
-        .map((item) => Package.fromJson(item as Map<String, dynamic>))
-        .toList();
+    return jsonList.map((item) => Package.fromJson(item as Map<String, dynamic>)).toList();
   } catch (e) {
     print('Erro ao chamar Gemini ou fazer parsing: $e');
     return [];
@@ -162,14 +155,6 @@ Router _router() {
     );
   });
 
-  router.get('/list-models', (Request req) async {
-    if (geminiModel == null) {
-      return Response.internalServerError(
-        body: 'API key não configurada',
-      );
-    }
-  });
-
   router.post('/packages/suggest', (Request req) async {
     try {
       final content = await req.readAsString();
@@ -178,26 +163,19 @@ Router _router() {
       final needs = data['needs'] as String? ?? '';
       final budget = (data['budget'] as num? ?? 0.0).toDouble();
 
-      final query =
-          'O que preciso: $needs. Orçamento máximo: R\$${budget.toStringAsFixed(2)}.';
+      final query = 'O que preciso: $needs. Orçamento máximo: R\$${budget.toStringAsFixed(2)}.';
 
       final suggested = await suggestPackages(query);
 
       if (suggested.isEmpty) {
         return Response.ok(
-          jsonEncode({
-            'success': false,
-            'message': 'Nenhuma sugestão encontrada.'
-          }),
+          jsonEncode({'success': false, 'message': 'Nenhuma sugestão encontrada.'}),
           headers: {'content-type': 'application/json'},
         );
       }
 
       return Response.ok(
-        jsonEncode({
-          'success': true,
-          'suggestions': suggested.map((p) => p.toJson()).toList()
-        }),
+        jsonEncode({'success': true, 'suggestions': suggested.map((p) => p.toJson()).toList()}),
         headers: {'content-type': 'application/json'},
       );
     } catch (e) {
@@ -210,10 +188,7 @@ Router _router() {
 
   router.get('/packages/all', (Request req) {
     return Response.ok(
-      jsonEncode({
-        'success': true,
-        'packages': availablePackages.map((p) => p.toJson()).toList(),
-      }),
+      jsonEncode({'success': true, 'packages': availablePackages.map((p) => p.toJson()).toList()}),
       headers: {'content-type': 'application/json'},
     );
   });
@@ -225,26 +200,20 @@ Router _router() {
 Future<void> main() async {
   initializeGemini();
 
+  final corsHeadersMiddleware = corsHeaders(
+    headers: {
+      'Access-Control-Allow-Origin': '*', // permite Flutter Web
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Origin, Content-Type',
+    },
+  );
+
   final handler = const Pipeline()
       .addMiddleware(logRequests())
-      .addMiddleware(corsHeaders())
+      .addMiddleware(corsHeadersMiddleware)
       .addHandler(_router());
 
-  // Detecta automaticamente o IP da máquina na rede local
-  String localIp = InternetAddress.anyIPv4.address; // default
-  try {
-    final interfaces = await NetworkInterface.list(
-      type: InternetAddressType.IPv4,
-      includeLoopback: false,
-    );
-    if (interfaces.isNotEmpty && interfaces.first.addresses.isNotEmpty) {
-      localIp = interfaces.first.addresses.first.address;
-    }
-  } catch (_) {}
-
   final server = await io.serve(handler, InternetAddress.anyIPv4, 8080);
-
-  print('Servidor rodando em http://$localIp:${server.port}');
-  print('Endpoints disponíveis: /ping, /list-models, /packages/suggest, /packages/all');
-  print('Use este IP no seu Android na mesma rede Wi-Fi.');
+  print('Servidor rodando em http://${server.address.address}:${server.port}');
+  print('Endpoints disponíveis: /ping, /packages/suggest, /packages/all');
 }
