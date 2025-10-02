@@ -1,3 +1,5 @@
+// lib/models/package.dart
+
 /// Modelo que representa um pacote de serviços (internet, mobile, etc.)
 class Package {
   final String name;        // Nome do pacote
@@ -37,7 +39,10 @@ class Package {
         name: map['name'] as String,
         description: map['description'] as String,
         type: map['type'] as String,
-        price: (map['price'] as num).toDouble(),
+        // --- LINHA CORRIGIDA ---
+        // Em vez de fazer cast, fazemos o parse da String para double.
+        price: double.parse(map['price'] as String),
+        // --- FIM DA CORREÇÃO ---
         features: map['features'] as String,
       );
 }
