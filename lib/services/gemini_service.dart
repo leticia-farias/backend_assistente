@@ -17,8 +17,8 @@ class GeminiService {
       print('ERRO: GEMINI_API_KEY não configurada.');
       geminiModel = null; // Se não tiver chave, não inicializa o modelo
     } else {
-      geminiModel = GenerativeModel(model: 'gemini-2.5-flash', apiKey: geminiApiKey);
-      print('Gemini inicializado com modelo gemini-2.5-flash');
+      geminiModel = GenerativeModel(model: 'gemini-pro', apiKey: geminiApiKey);
+      print('Gemini inicializado com sucesso!');
     }
   }
 

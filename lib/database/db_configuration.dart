@@ -5,10 +5,10 @@ import 'package:postgres/postgres.dart';
 class DbConfiguration {
   final PostgreSQLConnection _connection;
 
-  // Construtor privado
   DbConfiguration._(this._connection);
 
   static Future<DbConfiguration> create() async {
+    // 1. Lê a variável de ambiente DATABASE_URL
     final dbUrl = Platform.environment['DATABASE_URL'];
 
     if (dbUrl == null || dbUrl.isEmpty) {
@@ -17,33 +17,32 @@ class DbConfiguration {
     }
 
     try {
-      // Usamos a classe Uri nativa do Dart para parsear a URL,
-      // que é a abordagem correta para a versão 2.x do pacote postgres.
       final uri = Uri.parse(dbUrl);
+
+      // 2. Lógica para corrigir a porta ausente (essencial para o Render)
+      final port = uri.port == 0 ? 5432 : uri.port;
 
       final connection = PostgreSQLConnection(
         uri.host,
-        uri.port,
-        uri.pathSegments.first, // O nome do banco de dados
+        port,
+        uri.pathSegments.first,
         username: uri.userInfo.split(':')[0],
         password: uri.userInfo.split(':')[1],
-        useSSL: true, // Essencial para o Render
+        useSSL: true,
       );
 
+      print('Tentando conectar ao banco de dados em ${uri.host}:$port...');
       await connection.open();
       print('✅ Conexão com o banco de dados PostgreSQL estabelecida com sucesso!');
       return DbConfiguration._(connection);
 
     } on PostgreSQLException catch (e) {
-      // O método toDisplayString não existe na v2.x. 
-      // Construímos uma mensagem de erro detalhada manualmente.
-      print('Falha ao conectar ao banco de dados (PostgreSQLException):');
-      print('  Mensagem: ${e.message}');
-      print('  Código de erro: ${e.code}');
-      print('  Detalhes completos: ${e.toString()}');
+      print('❌ Falha ao conectar ao banco de dados (PostgreSQLException):');
+      print('   Verifique se a DATABASE_URL no seu ambiente está correta.');
+      print('   Mensagem do erro: ${e.message}');
       rethrow;
     } catch (e) {
-      print('Falha inesperada ao conectar ao banco de dados: $e');
+      print('❌ Falha inesperada ao conectar ao banco de dados: $e');
       rethrow;
     }
   }
