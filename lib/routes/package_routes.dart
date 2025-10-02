@@ -1,3 +1,5 @@
+// backend_assistente/lib/routes/package_routes.dart
+
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
@@ -7,11 +9,9 @@ import '../services/package_service.dart';
 Router packageRoutes(GeminiService geminiService, PackageService packageService) {
   final router = Router();
 
-  // Endpoint de teste de servidor
   router.get('/ping', (req) => Response.ok(jsonEncode({'status': 'ok', 'message': 'pong'}),
       headers: {'content-type': 'application/json'}));
 
-  // Retorna todos os pacotes do banco de dados
   router.get('/packages/all', (req) async {
     final packages = await packageService.getAllPackages();
     return Response.ok(
@@ -20,7 +20,6 @@ Router packageRoutes(GeminiService geminiService, PackageService packageService)
     );
   });
 
-  // Sugere pacotes com base nas necessidades do usuário
   router.post('/packages/suggest', (req) async {
     try {
       final content = await req.readAsString();
@@ -29,10 +28,22 @@ Router packageRoutes(GeminiService geminiService, PackageService packageService)
       final needs = data['needs'] as String? ?? '';
       final budget = (data['budget'] as num? ?? 0.0).toDouble();
 
-      // Busca todos os pacotes disponíveis no banco de dados
       final availablePackages = await packageService.getAllPackages();
 
-      // Cria a consulta para a IA
+      // --- INÍCIO DA MELHORIA ---
+      // Se o usuário pedir para ver todos os planos, retornamos a lista completa
+      // sem precisar consultar a IA.
+      final userRequest = needs.toLowerCase();
+      if (userRequest.contains('todos') || userRequest.contains('tudo')) {
+        return Response.ok(
+            jsonEncode({
+              'success': true,
+              'suggestions': availablePackages.map((p) => p.toJson()).toList()
+            }),
+            headers: {'content-type': 'application/json'});
+      }
+      // --- FIM DA MELHORIA ---
+
       final query = 'O que preciso: $needs. Orçamento máximo: R\$${budget.toStringAsFixed(2)}.';
       final suggested = await geminiService.suggestPackages(query, availablePackages);
 
