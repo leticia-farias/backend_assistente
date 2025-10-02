@@ -7,16 +7,17 @@ environment:
 
 dependencies:
   # Framework Web
-  shelf: 1.4.1
-  shelf_router: 1.1.2
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
   shelf_cors_headers: 0.1.5
   
   # API Gemini - Atualizada para a versão estável mais recente
   google_generative_ai: ^0.4.7
   
   # Utilitários
-  http: 1.2.1
+  http: ^1.5.0
+  postgres: ^2.6.1
 
 dev_dependencies:
-  lints: 2.1.1
-  test: 1.24.0
+  lints: ^5.1.1
+  test: ^1.26.3

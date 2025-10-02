@@ -13,38 +13,38 @@ Router packageRoutes(GeminiService geminiService, PackageService packageService)
       headers: {'content-type': 'application/json'}));
 
   // Retorna todos os pacotes mockados
-  router.get('/packages/all', (req) => Response.ok(
-      jsonEncode({'success': true, 'packages': packageService.all.map((p) => p.toJson()).toList()}),
-      headers: {'content-type': 'application/json'}));
+  // router.get('/packages/all', (req) => Response.ok(
+  //     jsonEncode({'success': true, 'packages': packageService.all.map((p) => p.toJson()).toList()}),
+  //     headers: {'content-type': 'application/json'}));
 
   // Sugere pacotes com base nas necessidades e orçamento do usuário
-  router.post('/packages/suggest', (req) async {
-    try {
-      final content = await req.readAsString();
-      final data = jsonDecode(content);
+  // router.post('/packages/suggest', (req) async {
+  //   try {
+  //     final content = await req.readAsString();
+  //     final data = jsonDecode(content);
 
-      final needs = data['needs'] as String? ?? '';
-      final budget = (data['budget'] as num? ?? 0.0).toDouble();
+  //     final needs = data['needs'] as String? ?? '';
+  //     final budget = (data['budget'] as num? ?? 0.0).toDouble();
 
-      // Cria consulta amigável para o Gemini
-      final query = 'O que preciso: $needs. Orçamento máximo: R\$${budget.toStringAsFixed(2)}.';
-      final suggested = await geminiService.suggestPackages(query, packageService.all);
+  //     // Cria consulta amigável para o Gemini
+  //     final query = 'O que preciso: $needs. Orçamento máximo: R\$${budget.toStringAsFixed(2)}.';
+  //     final suggested = await geminiService.suggestPackages(query, packageService.all);
 
-      if (suggested.isEmpty) {
-        return Response.ok(
-            jsonEncode({'success': false, 'message': 'Nenhuma sugestão encontrada.'}),
-            headers: {'content-type': 'application/json'});
-      }
+  //     if (suggested.isEmpty) {
+  //       return Response.ok(
+  //           jsonEncode({'success': false, 'message': 'Nenhuma sugestão encontrada.'}),
+  //           headers: {'content-type': 'application/json'});
+  //     }
 
-      return Response.ok(
-          jsonEncode({'success': true, 'suggestions': suggested.map((p) => p.toJson()).toList()}),
-          headers: {'content-type': 'application/json'});
-    } catch (e) {
-      return Response.internalServerError(
-          body: jsonEncode({'success': false, 'error': e.toString()}),
-          headers: {'content-type': 'application/json'});
-    }
-  });
+  //     return Response.ok(
+  //         jsonEncode({'success': true, 'suggestions': suggested.map((p) => p.toJson()).toList()}),
+  //         headers: {'content-type': 'application/json'});
+  //   } catch (e) {
+  //     return Response.internalServerError(
+  //         body: jsonEncode({'success': false, 'error': e.toString()}),
+  //         headers: {'content-type': 'application/json'});
+  //   }
+  // });
 
   return router;
 }
