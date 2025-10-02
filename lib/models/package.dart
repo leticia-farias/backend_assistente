@@ -23,12 +23,21 @@ class Package {
         'features': features,
       };
 
-  /// Cria um objeto Package a partir de um JSON
+  /// Cria um objeto Package a partir de um JSON (vindo da IA)
   factory Package.fromJson(Map<String, dynamic> json) => Package(
         name: json['name'] as String,
         description: json['description'] as String,
         type: json['type'] as String,
         price: (json['price'] as num).toDouble(),
         features: json['features'] as String,
+      );
+      
+  /// Cria um objeto Package a partir de um Map (vindo do banco de dados)
+  factory Package.fromMap(Map<String, dynamic> map) => Package(
+        name: map['name'] as String,
+        description: map['description'] as String,
+        type: map['type'] as String,
+        price: (map['price'] as num).toDouble(),
+        features: map['features'] as String,
       );
 }

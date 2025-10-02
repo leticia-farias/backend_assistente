@@ -4,9 +4,9 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
 import 'package:shelf_router/shelf_router.dart';
 
-// --- NOVOS IMPORTS ---
-import 'package:postgres/postgres.dart'; // Importa o pacote do postgres
-import 'package:backend_server/database/db_configuration.dart'; // Importa nosso gerenciador de conexão
+// --- IMPORTS PARA VARIÁVEIS DE AMBIENTE E BANCO DE DADOS ---
+import 'package:dotenv/dotenv.dart'; // Importação corrigida
+import 'package:backend_server/database/db_configuration.dart'; 
 
 // --- SEUS IMPORTS EXISTENTES ---
 import 'package:backend_server/services/gemini_service.dart';
@@ -15,21 +15,17 @@ import 'package:backend_server/routes/package_routes.dart';
 
 /// Ponto de entrada do servidor
 Future<void> main() async {
-  // --- PASSO 1: INICIALIZAR A CONEXÃO COM O BANCO DE DADOS ---
-  // A conexão é estabelecida antes de qualquer outra coisa.
-  // Se falhar, o servidor não irá iniciar.
+  // Carrega as variáveis de ambiente do arquivo .env
+  // Usamos DotEnv().load() para ser mais explícito
+  DotEnv().load();
+
+  // O resto do seu código permanece o mesmo
   final dbConfig = await DbConfiguration.create();
   final dbConnection = dbConfig.connection;
 
-  // --- PASSO 2: INJETAR A CONEXÃO NOS SERVIÇOS ---
-  // O GeminiService não parece precisar do banco, então permanece igual.
-  final geminiService = GeminiService(); 
-  
-  // O PackageService agora recebe a conexão com o banco em seu construtor.
-  // (Você precisará ajustar a classe PackageService para aceitar isso).
+  final geminiService = GeminiService();
   final packageService = PackageService(dbConnection);
 
-  // O resto do seu código permanece praticamente o mesmo
   final router = Router()
     ..mount('/', packageRoutes(geminiService, packageService));
 
