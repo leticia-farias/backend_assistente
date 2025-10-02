@@ -9,11 +9,12 @@ import 'package:backend_server/routes/package_routes.dart';
 
 /// Ponto de entrada do servidor
 Future<void> main() async {
-  final geminiService = GeminiService();       // Serviço Gemini
-  final packageService = PackageService();     // Serviço de pacotes
+  final geminiService = GeminiService(); // Serviço Gemini
+  final packageService = PackageService(); // Serviço de pacotes
 
   // Cria o router principal com as rotas de pacotes
-  final router = Router()..mount('/', packageRoutes(geminiService, packageService));
+  final router = Router()
+    ..mount('/', packageRoutes(geminiService, packageService));
 
   // Middleware: logs e CORS
   final handler = const Pipeline()
@@ -26,7 +27,7 @@ Future<void> main() async {
       .addHandler(router);
 
   // Inicializa o servidor
-  final server = await io.serve(handler, InternetAddress.anyIPv4, 8080);
-  print('Servidor rodando em http://${server.address.address}:${server.port}');
-  print('Endpoints disponíveis: /ping, /packages/suggest, /packages/all');
+  final port = int.parse(Platform.environment['PORT'] ?? '8080');
+  final server = await io.serve(handler, InternetAddress.anyIPv4, port);
+  print('Rodando em porta $port');
 }
