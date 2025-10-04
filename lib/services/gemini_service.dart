@@ -26,7 +26,12 @@ class GeminiService {
       print('--- ERRO CRÍTICO: GEMINI_API_KEY não configurada no ambiente. ---');
       geminiModel = null;
     } else {
-      geminiModel = GenerativeModel(model: 'gemini-pro', apiKey: geminiApiKey);
+      // --- CORREÇÃO DEFINITIVA AQUI ---
+      // Trocamos 'gemini-pro' por um modelo mais moderno e estável.
+      // 'gemini-1.5-flash-latest' é rápido e ideal para aplicações de chat.
+      geminiModel = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: geminiApiKey);
+      // --- FIM DA CORREÇÃO ---
+      
       print('[GeminiService] Gemini inicializado com sucesso!');
     }
   }
