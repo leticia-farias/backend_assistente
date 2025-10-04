@@ -1,12 +1,12 @@
-// lib/models/package.dart
+// backend_assistente/lib/models/package.dart
 
 /// Modelo que representa um pacote de serviços (internet, mobile, etc.)
 class Package {
-  final String name;        // Nome do pacote
-  final String description; // Descrição detalhada do pacote
-  final String type;        // Tipo do pacote (mobile_data, fixed_internet, etc.)
-  final double price;       // Preço do pacote
-  final String features;    // Principais funcionalidades ou benefícios
+  final String name;
+  final String description;
+  final String type;
+  final double price;
+  final String features;
 
   Package({
     required this.name,
@@ -35,14 +35,26 @@ class Package {
       );
       
   /// Cria um objeto Package a partir de um Map (vindo do banco de dados)
-  factory Package.fromMap(Map<String, dynamic> map) => Package(
-        name: map['name'] as String,
-        description: map['description'] as String,
-        type: map['type'] as String,
-        // --- LINHA CORRIGIDA ---
-        // Em vez de fazer cast, fazemos o parse da String para double.
-        price: double.parse(map['price'] as String),
-        // --- FIM DA CORREÇÃO ---
-        features: map['features'] as String,
-      );
+  factory Package.fromMap(Map<String, dynamic> map) {
+    // --- INÍCIO DA CORREÇÃO ---
+    // Lógica robusta para converter o preço
+    final priceValue = map['price'];
+    double parsedPrice;
+    if (priceValue is String) {
+      parsedPrice = double.tryParse(priceValue) ?? 0.0;
+    } else if (priceValue is num) {
+      parsedPrice = priceValue.toDouble();
+    } else {
+      parsedPrice = 0.0;
+    }
+    // --- FIM DA CORREÇÃO ---
+
+    return Package(
+      name: map['name'] as String,
+      description: map['description'] as String,
+      type: map['type'] as String,
+      price: parsedPrice, // Usa a variável corrigida
+      features: map['features'] as String,
+    );
+  }
 }
