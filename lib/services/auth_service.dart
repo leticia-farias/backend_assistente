@@ -8,7 +8,6 @@ class AuthService {
 
   Future<Map<String, dynamic>?> login(String email, String password) async {
     try {
-      // 1. Busca o usuário pelo email e senha
       final userResult = await _dbConnection.mappedResultsQuery(
         "SELECT id, name, email, current_plan FROM users WHERE email = @email AND password = @password",
         substitutionValues: {
@@ -24,7 +23,6 @@ class AuthService {
       final user = userResult.first['users']!;
       final userId = user['id'];
 
-      // 2. Busca o score do usuário
       final scoreResult = await _dbConnection.mappedResultsQuery(
         "SELECT loyalty_score FROM user_scores WHERE user_id = @userId",
         substitutionValues: {'userId': userId},
@@ -44,7 +42,6 @@ class AuthService {
         }
       }
 
-      // 3. Retorna os dados combinados
       return {
         'user': user,
         'score': score,
@@ -61,14 +58,24 @@ class AuthService {
       String name, String email, String phone, String password) async {
     try {
       // Verifica se o email já existe
-      final existingUser = await _dbConnection.mappedResultsQuery(
+      final existingEmail = await _dbConnection.mappedResultsQuery(
         "SELECT id FROM users WHERE email = @email",
         substitutionValues: {'email': email},
       );
 
-      if (existingUser.isNotEmpty) {
+      if (existingEmail.isNotEmpty) {
         return {'success': false, 'error': 'Este email já está em uso.'};
       }
+
+      final existingPhone = await _dbConnection.mappedResultsQuery(
+        "SELECT id FROM users WHERE phone = @phone",
+        substitutionValues: {'phone': phone},
+      );
+
+      if (existingPhone.isNotEmpty) {
+        return {'success': false, 'error': 'Este telefone já está em uso.'};
+      }
+      // ----------------------------------------------------------------
 
       // Insere o novo usuário
       await _dbConnection.execute(
@@ -83,8 +90,8 @@ class AuthService {
 
       return {'success': true, 'message': 'Usuário criado com sucesso!'};
     } catch (e) {
-      print('Erro no serviço de cadastro: $e');
-      return {'success': false, 'error': 'Não foi possível criar o usuário.'};
+      print('Erro CRÍTICO no serviço de cadastro: $e');
+      return {'success': false, 'error': 'Erro interno ao tentar criar o usuário.'};
     }
   }
 }
