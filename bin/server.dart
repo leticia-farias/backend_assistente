@@ -1,3 +1,5 @@
+// backend_assistente/bin/server.dart
+
 import 'dart:io';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as io;
@@ -10,8 +12,6 @@ import 'package:backend_server/database/db_configuration.dart';
 import 'package:backend_server/services/gemini_service.dart';
 import 'package:backend_server/services/package_service.dart';
 import 'package:backend_server/routes/package_routes.dart';
-
-// --- NOVAS IMPORTAÇÕES ---
 import 'package:backend_server/services/auth_service.dart';
 import 'package:backend_server/routes/auth_routes.dart';
 
@@ -21,13 +21,16 @@ Future<void> main() async {
   final dbConfig = await DbConfiguration.create();
   final dbConnection = dbConfig.connection;
 
+  // Inicialização dos serviços
   final geminiService = GeminiService();
   final packageService = PackageService(dbConnection);
-  final authService = AuthService(dbConnection); // --- NOVO SERVIÇO ---
+  final authService = AuthService(dbConnection);
 
+  // --- CORREÇÃO PRINCIPAL AQUI ---
+  // Monta os grupos de rotas com seus respectivos prefixos.
   final router = Router()
-    ..mount('/packages/', packageRoutes(geminiService, packageService))
-    ..mount('/auth/', authRoutes(authService)); // --- NOVAS ROTAS ---
+    ..mount('/packages', packageRoutes(geminiService, packageService))
+    ..mount('/auth', authRoutes(authService));
 
   final handler = const Pipeline()
       .addMiddleware(logRequests())
