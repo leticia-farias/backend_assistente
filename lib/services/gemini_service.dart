@@ -5,17 +5,7 @@ import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import '../models/package.dart';
 
-String _sanitizeAndExtractJson(String raw) {
-  print('[GeminiService] Iniciando sanitização do JSON...');
-  if (raw.isEmpty) return "";
-  final jsonStartIndex = raw.indexOf(RegExp(r'\[|\{'));
-  if (jsonStartIndex == -1) return "";
-  final jsonEndIndex = raw.lastIndexOf(RegExp(r'\]|\}'));
-  if (jsonEndIndex == -1) return "";
-  final extracted = raw.substring(jsonStartIndex, jsonEndIndex + 1).trim();
-  print('[GeminiService] JSON extraído: "$extracted"');
-  return extracted;
-}
+// (O resto do arquivo pode continuar igual, a mudança é só no construtor)
 
 class GeminiService {
   late final GenerativeModel? geminiModel;
@@ -26,17 +16,17 @@ class GeminiService {
       print('--- ERRO CRÍTICO: GEMINI_API_KEY não configurada no ambiente. ---');
       geminiModel = null;
     } else {
-      // --- CORREÇÃO DEFINITIVA AQUI ---
-      // Trocamos 'gemini-pro' por um modelo mais moderno e estável.
-      // 'gemini-1.5-flash-latest' é rápido e ideal para aplicações de chat.
-      geminiModel = GenerativeModel(model: 'gemini-1.5-flash-latest', apiKey: geminiApiKey);
-      // --- FIM DA CORREÇÃO ---
+      // --- MUDANÇA FINAL AQUI ---
+      // Usando o nome do modelo que a versão 0.4.7 da biblioteca reconhece.
+      geminiModel = GenerativeModel(model: 'gemini-pro-latest', apiKey: geminiApiKey);
       
       print('[GeminiService] Gemini inicializado com sucesso!');
     }
   }
-
-  Future<List<Package>> suggestPackages(String query, List<Package> availablePackages) async {
+  
+  // O restante do seu código neste arquivo não precisa mudar.
+  // ... continue com a função suggestPackages ...
+    Future<List<Package>> suggestPackages(String query, List<Package> availablePackages) async {
     if (geminiModel == null) {
       print('[GeminiService] A sugestão foi cancelada porque o modelo Gemini não foi inicializado.');
       return [];
@@ -95,4 +85,16 @@ Você é um assistente de operadora. Sua única função é analisar o pedido do
       return [];
     }
   }
+}
+
+String _sanitizeAndExtractJson(String raw) {
+  print('[GeminiService] Iniciando sanitização do JSON...');
+  if (raw.isEmpty) return "";
+  final jsonStartIndex = raw.indexOf(RegExp(r'\[|\{'));
+  if (jsonStartIndex == -1) return "";
+  final jsonEndIndex = raw.lastIndexOf(RegExp(r'\]|\}'));
+  if (jsonEndIndex == -1) return "";
+  final extracted = raw.substring(jsonStartIndex, jsonEndIndex + 1).trim();
+  print('[GeminiService] JSON extraído: "$extracted"');
+  return extracted;
 }

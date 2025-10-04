@@ -11,7 +11,6 @@ dependencies:
   shelf_router: ^1.1.4
   shelf_cors_headers: 0.1.5
   
-  # API Gemini - Atualizada para a versão estável mais recente
   google_generative_ai: ^0.4.7
   
   # Utilitários
