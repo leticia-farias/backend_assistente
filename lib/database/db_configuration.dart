@@ -9,7 +9,7 @@ class DbConfiguration {
 
   static Future<DbConfiguration> create() async {
     // 1. Lê a variável de ambiente DATABASE_URL
-    final dbUrl = Platform.environment['DATABASE_URL'];
+    final dbUrl = 'postgresql://bd_kip_user:4PGeeAIYAEzIfRjSXpdfLih87ruFfAtn@dpg-d3f6tjl6ubrc73fgt5kg-a.oregon-postgres.render.com/bd_kip';
 
     if (dbUrl == null || dbUrl.isEmpty) {
       print('ERRO: Variável de ambiente DATABASE_URL não encontrada.');
