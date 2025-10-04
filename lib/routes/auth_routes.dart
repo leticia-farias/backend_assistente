@@ -36,5 +36,40 @@ Router authRoutes(AuthService authService) {
     }
   });
 
+  router.post('/register', (Request req) async {
+    try {
+      final content = await req.readAsString();
+      final data = jsonDecode(content);
+
+      final name = data['name'] as String?;
+      final email = data['email'] as String?;
+      final phone = data['phone'] as String?;
+      final password = data['password'] as String?; 
+
+      if (name == null || email == null || phone == null || password == null) {
+        return Response.badRequest(
+            body: jsonEncode({
+          'success': false,
+          'error': 'Nome, email, telefone e senha são obrigatórios.'
+        }));
+      }
+
+      final result = await authService.register(name, email, phone, password);
+
+      if (result['success']) {
+        return Response.ok(jsonEncode(result));
+      } else {
+        return Response(409, 
+            body: jsonEncode(result));
+      }
+    } catch (e) {
+      print('Erro na rota de cadastro: $e');
+      return Response.internalServerError(
+          body: jsonEncode(
+              {'success': false, 'error': 'Erro interno do servidor.'}));
+    }
+  });
+
+
   return router;
 }

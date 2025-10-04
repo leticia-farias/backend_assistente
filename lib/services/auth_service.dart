@@ -56,4 +56,35 @@ class AuthService {
       return null;
     }
   }
+
+  Future<Map<String, dynamic>> register(
+      String name, String email, String phone, String password) async {
+    try {
+      // Verifica se o email já existe
+      final existingUser = await _dbConnection.mappedResultsQuery(
+        "SELECT id FROM users WHERE email = @email",
+        substitutionValues: {'email': email},
+      );
+
+      if (existingUser.isNotEmpty) {
+        return {'success': false, 'error': 'Este email já está em uso.'};
+      }
+
+      // Insere o novo usuário
+      await _dbConnection.execute(
+        "INSERT INTO users (name, email, phone, password) VALUES (@name, @email, @phone, @password)",
+        substitutionValues: {
+          'name': name,
+          'email': email,
+          'phone': phone,
+          'password': password,
+        },
+      );
+
+      return {'success': true, 'message': 'Usuário criado com sucesso!'};
+    } catch (e) {
+      print('Erro no serviço de cadastro: $e');
+      return {'success': false, 'error': 'Não foi possível criar o usuário.'};
+    }
+  }
 }
